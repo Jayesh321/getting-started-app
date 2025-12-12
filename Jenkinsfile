@@ -1,45 +1,23 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "getting-started-app"
-        TAG = "latest"
-    }
-
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh """
-                    docker build -t ${IMAGE_NAME}:${TAG} .
+                    docker build -t getting-started .
                 """
             }
         }
 
-        stage('Run container') {
+        stage('Run Container') {
             steps {
                 sh """
-                    docker run -d --name test-app -p 3000:3000 ${IMAGE_NAME}:${TAG}
+                    docker stop getting-started || true
+                    docker rm getting-started || true
+                    docker run -d --name getting-started -p 127.0.0.1:3000:3000 getting-started
                 """
             }
-        }
-
-        stage('Verify') {
-            steps {
-                sh "docker ps"
-            }
-        }
-    }
-
-    post {
-        always {
-            sh "docker stop test-app || true"
-            sh "docker rm test-app || true"
         }
     }
 }
